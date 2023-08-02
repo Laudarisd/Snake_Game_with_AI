@@ -9,5 +9,7 @@
 
 
 ***Reference***
+
 https://github.com/patrickloeber/snake-ai-pytorch/issues
+
 https://www.youtube.com/watch?v=L8ypSXwyBds
