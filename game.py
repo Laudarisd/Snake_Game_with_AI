@@ -89,6 +89,13 @@ class SnakeGameAI:
         # 2. move
         self._move(action) # update the head
         self.snake.insert(0, self.head)
+
+        # Check if the game is over due to self-collision
+        game_over = False
+        if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
+            game_over = True
+
+        
         # Calculate ttan distance between snake head and food
         distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.y)
 

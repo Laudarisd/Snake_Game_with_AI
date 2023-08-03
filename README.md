@@ -27,4 +27,4 @@ distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.
 
 ## TO DO:
 
-- 
+- Avoiding snake 
