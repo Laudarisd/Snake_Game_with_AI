@@ -30,7 +30,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0,0,0)
 
 BLOCK_SIZE = 20
-SPEED = 10
+SPEED = 8
 
 class SnakeGameAI:
     
@@ -45,6 +45,8 @@ class SnakeGameAI:
         #init game state
   
         self.direction = Direction.RIGHT
+        self.last_distance_to_food = 0  # Initialize last_distance_to_food to zero
+
 
     def reset(self):
         # init game state
@@ -84,17 +86,33 @@ class SnakeGameAI:
             #         self.direction = Direction.UP
             #     elif event.key == pygame.K_DOWN:
             #         self.direction = Direction.DOWN
-            
-        
         # 2. move
         self._move(action) # update the head
         self.snake.insert(0, self.head)
+        # Calculate ttan distance between snake head and food
+        distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.y)
+
+        # Calculate reward based on distance to food
+        if distance_to_food < self.last_distance_to_food:
+            reward = 1  # Higher reward for moving closer to the food
+        elif distance_to_food == 0:
+            reward = 10  # Higher reward when the snake finds the food
+        else:
+            reward = -1  # Negative reward for moving away from the food
+
+        self.last_distance_to_food = distance_to_food  # Update last distance for the next step
+
         
         # 3. check if game over
         reward = 0
+        # game_over = False
+        # if self.is_collision() or self.frame_iteration > 100*len(self.snake):
+        #     game_over = True
+
         game_over = False
-        if self.is_collision() or self.frame_iteration > 100*len(self.snake):
+        if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
             game_over = True
+
             reward = -10
             return reward, game_over, self.score
             
@@ -112,16 +130,27 @@ class SnakeGameAI:
         # 6. return game over and score
         return reward, game_over, self.score
     
+    # def is_collision(self, pt=None):
+    #     if pt is None:
+    #         pt = self.head
+    #     # hits boundary
+    #     if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
+    #         return True
+    #     # hits itself
+    #     if pt in self.snake[1:]:
+    #         return True
+        
+    #     return False
     def is_collision(self, pt=None):
         if pt is None:
             pt = self.head
         # hits boundary
         if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
             return True
-        # hits itself
-        if pt in self.snake[1:]:
+        # hits itself if length is >= 10 boxes
+        if len(self.snake) >= 10 and pt in self.snake[1:]:
             return True
-        
+
         return False
         
     def _update_ui(self):
@@ -137,19 +166,47 @@ class SnakeGameAI:
         self.display.blit(text, [0, 0])
         pygame.display.flip()
         
+    # def _move(self, action):
+    #     #[straight, righ , left]
+    #     clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
+    #     idx = clock_wise.index(self.direction) #direction must be enum value in clock wise Direction
+
+    #     if np.array_equal(action, [1, 0, 0]):
+    #         new_dir = clock_wise[idx] #no change
+    #     if np.array_equal(action, [0, 1, 0]):
+    #         next_idx = (idx + 1) % 4 #if we are at the end up then modulo 4 is 0 again
+    #         new_dir = clock_wise[idx] # right turn r -> d -> l -> u
+    #     else: # [0, 0, 1]
+    #         next_idx = (idx - 1) % 4 #if we are at the end up then modulo 4 is 0 again
+    #         new_dir = clock_wise[idx] # left turn r -> u -> l -> d
+
+    #     self.direction = new_dir
+    #     x = self.head.x
+    #     y = self.head.y
+    #     if self.direction == Direction.RIGHT:
+    #         x += BLOCK_SIZE
+    #     elif self.direction == Direction.LEFT:
+    #         x -= BLOCK_SIZE
+    #     elif self.direction == Direction.DOWN:
+    #         y += BLOCK_SIZE
+    #     elif self.direction == Direction.UP:
+    #         y -= BLOCK_SIZE
+            
+    #     self.head = Point(x, y)
+
     def _move(self, action):
-        #[straight, righ , left]
+        #[straight, right, left]
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
-        idx = clock_wise.index(self.direction) #direction must be enum value in clock wise Direction
+        idx = clock_wise.index(self.direction)
 
         if np.array_equal(action, [1, 0, 0]):
-            new_dir = clock_wise[idx] #no change
-        if np.array_equal(action, [0, 1, 0]):
-            next_idx = (idx + 1) % 4 #if we are at the end up then modulo 4 is 0 again
-            new_dir = clock_wise[idx] # right turn r -> d -> l -> u
+            new_dir = clock_wise[idx] # no change
+        elif np.array_equal(action, [0, 1, 0]):
+            next_idx = (idx + 1) % 4
+            new_dir = clock_wise[next_idx] # right turn r -> d -> l -> u
         else: # [0, 0, 1]
-            next_idx = (idx - 1) % 4 #if we are at the end up then modulo 4 is 0 again
-            new_dir = clock_wise[idx] # left turn r -> u -> l -> d
+            next_idx = (idx - 1) % 4
+            new_dir = clock_wise[next_idx] # left turn r -> u -> l -> d
 
         self.direction = new_dir
         x = self.head.x
@@ -162,8 +219,9 @@ class SnakeGameAI:
             y += BLOCK_SIZE
         elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
-            
+
         self.head = Point(x, y)
+
             
 
 # if __name__ == '__main__':
