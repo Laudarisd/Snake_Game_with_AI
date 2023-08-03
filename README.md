@@ -5,6 +5,10 @@ Applied Q-learning
 
 ![Bellman Equation](./img/Bellman_equation.png)
 
+
+
+![After it plays few games](./img/test_2.gif)
+
 # Snake_Game_with_AI
 
 - Apllied GPU/CPU version
