@@ -24,7 +24,7 @@ distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.
 
 ```
 
- ## In the beginning of training 
+## In the beginning of training 
 ![Training clip](./img/test.gif)
 
 
@@ -33,7 +33,7 @@ distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.
 ![After it plays few games](./img/test_3.gif)
 
 
- ## While colliding itself
+## While colliding itself
 
 ![After it plays few games](./img/test_2.gif)
 
