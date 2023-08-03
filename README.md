@@ -7,7 +7,6 @@ Applied Q-learning
 
 
 
-![After it plays few games](./img/test_2.gif)
 
 # Snake_Game_with_AI
 
@@ -25,7 +24,13 @@ distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.
 
 ```
 
+ ## In the beginning of training 
 ![Training clip](./img/test.gif)
+
+
+ ## After few steps of training
+
+![After it plays few games](./img/test_2.gif)
 
 
 
