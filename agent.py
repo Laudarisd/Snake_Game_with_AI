@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MAX_MEMORY = 100_000 #we can store 1000000 memory in deque
 BATCH_SIZE = 1000 # we will take 1000 memory from deque to train our model
-LR = 0.00001 # learning rate
+LR = 0.001 # learning rate
 BLOCK_SIZE  = 20
 
 class Agent:
@@ -83,73 +83,63 @@ class Agent:
             #mini_sample = self.memory
             mini_sample = random.sample(self.memory, BATCH_SIZE)
 
+            # states, actions, rewards, next_states, dones = zip(*mini_sample)
+            # # Convert each element to the desired device (GPU or CPU)
+            # states = torch.tensor(states, dtype=torch.float).to(device)
+            # next_states = torch.tensor(next_states, dtype=torch.float).to(device)
+            # actions = torch.tensor(actions, dtype=torch.long).to(device)
+            # rewards = torch.tensor(rewards, dtype=torch.float).to(device)
+            # dones = torch.tensor(dones, dtype=torch.bool).to(device)
+
             states, actions, rewards, next_states, dones = zip(*mini_sample)
-            # Convert each element to the desired device (GPU or CPU)
-            states = torch.tensor(states, dtype=torch.float).to(device)
-            next_states = torch.tensor(next_states, dtype=torch.float).to(device)
-            actions = torch.tensor(actions, dtype=torch.long).to(device)
-            rewards = torch.tensor(rewards, dtype=torch.float).to(device)
-            dones = torch.tensor(dones, dtype=torch.bool).to(device)
+            states = np.array(states)  # Convert states to numpy array
+            next_states = np.array(next_states)  # Convert next_states to numpy array
+            actions = np.array(actions)  # Convert actions to numpy array
+            rewards = np.array(rewards, dtype=np.float32)  # Convert rewards to numpy array
+            dones = np.array(dones, dtype=np.uint8)  # Convert dones to numpy array
+
+
             # Call trainer.train_step with the converted tensors
             self.trainer.train_step(states, actions, rewards, next_states, dones)
     def train_short_memory(self,  state, action, reward, next_state, done):
+        #self.trainer.train_step(state, action, reward, next_state, done)
+        state = np.array(state)  # Convert state to numpy array
+        action = np.array(action)  # Convert action to numpy array
+        reward = np.array([reward], dtype=np.float32)  # Convert reward to a numpy array
+
         self.trainer.train_step(state, action, reward, next_state, done)
-    
     def get_action(self, state):
         # ramdom moves : tradeoff exploration and /exploitation - in deep learning
-        # self.epsilon = 80 - self.n_games
-        # final_move = [0, 0, 0]
-        # if random.randint(0, 200) < self.epsilon:
-        #     move = random.randint(0, 2)
-        #     final_move[move] = 1
-        # else: # get action from Q table
-        #     state0 = torch.tensor(state, dtype=torch.float)
-        #     prediction = self.model(state0)
-        #     move = torch.argmax(prediction).item()
-        #     final_move[move] = 1
-        # return final_move
-
-        # Set epsilon based on the number of games played
-        #increase the value of epsilon to improve the training
-        #print(self.n_games)
-        # self.epsilon = 80 - self.n_games
-        #self.epsilon = 100 - self.n_games
-        
-        
-        self.epsilon = max(0.1, 100 - self.n_games)  # Ensure epsilon doesn't go below 0.1
-        # Decay epsilon over time
-        #self.epsilon = max(0.1, self.epsilon - self.epsilon_decay)
-        move = 0
-        #Generate a random value to decide whether to explore or exploit
-        if random.randint(0, 200) < self.epsilon:
-            #Explore
-            #action = random.randint(0, 2)
-            move = random.randint(0, 2)
-
-        else:
-            #Exploit
-            state0 = torch.tensor(state, dtype=torch.float).to(device)
-            prediction = self.model(state0)
-            action = torch.argmax(prediction).item()
-        #create a one-hot encosing action vector
+        self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
-        final_move[move] = 1
-
+        if random.randint(0, 200) < self.epsilon:
+            move = random.randint(0, 2)
+            final_move[move] = 1
+        else: # get action from Q table
+            state0 = torch.tensor(state, dtype=torch.float)
+            prediction = self.model(state0)
+            move = torch.argmax(prediction).item()
+            final_move[move] = 1
         return final_move
-    
-        # self.epsilon = max(0.1, 80 - self.n_games)  # Ensure epsilon doesn't go below 0.1
-        # # Increase exploration rate during training
-        # self.epsilon = max(0.1, 80 - self.n_games)  # Ensure epsilon doesn't go below 0.1
 
-        # final_move = [0, 0, 0]
-        # if random.random() < self.epsilon:
+        # self.epsilon = max(0.1, 100 - self.n_games)  # Ensure epsilon doesn't go below 0.1
+        # # Decay epsilon over time
+        # # self.epsilon = max(0.1, self.epsilon - self.epsilon_decay)
+        
+        # move = 0
+        # if random.randint(0, 200) < self.epsilon:
+        #     # Explore
         #     move = random.randint(0, 2)
-        #     final_move[move] = 1
         # else:
-        #     state0 = torch.tensor(state, dtype=torch.float)
+        #     # Exploit
+        #     state0 = torch.tensor(state, dtype=torch.float).to(device)
         #     prediction = self.model(state0)
-        #     move = torch.argmax(prediction).item()
-        #     final_move[move] = 1
+        #     action = torch.argmax(prediction).item()
+        #     move = action
+
+        # # Create a one-hot encoded action vector
+        # final_move = [0, 0, 0]
+        # final_move[move] = 1
 
         # return final_move
 
