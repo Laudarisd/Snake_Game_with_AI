@@ -9,6 +9,7 @@ from helper import plot
 #check gpu is vaialble or not
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print('Using device:', device)
 
 
 
@@ -97,8 +98,9 @@ class Agent:
             actions = np.array(actions)  # Convert actions to numpy array
             rewards = np.array(rewards, dtype=np.float32)  # Convert rewards to numpy array
             dones = np.array(dones, dtype=np.uint8)  # Convert dones to numpy array
-
-
+            # Print the device of the model's parameters
+            # print("Model parameters device:", next(self.model.parameters()).device)
+            # print("Trainer device:", self.trainer.device)
             # Call trainer.train_step with the converted tensors
             self.trainer.train_step(states, actions, rewards, next_states, dones)
     def train_short_memory(self,  state, action, reward, next_state, done):
