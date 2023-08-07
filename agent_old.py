@@ -27,9 +27,9 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate, must be smaller than 1
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 3, device).to(device)
+        self.model = Linear_QNet(11, 256, 3).to(device)
         #model, trainer
-        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma, device=device)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
        
     def get_state(self, game):
